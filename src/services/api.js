@@ -1,8 +1,8 @@
 import axios from 'axios';
 
 const api = axios.create({
-  // Same-origin '/api' by default (proxy in dev, rewrite/monorepo in prod). Set
-  // VITE_API_URL when the backend is hosted separately, e.g. https://api.example.com
+  // Same-origin '/api' by default (dev proxy / same-host deploy). Set
+  // VITE_API_URL when the backend is hosted separately, e.g. https://api.example.com/api
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json'

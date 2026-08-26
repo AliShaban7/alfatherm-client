@@ -44,7 +44,7 @@ const Inventory = () => {
 
   // A purchase invoice (faktura): one vendor + one warehouse + several product
   // lines, with one payment status for the whole invoice.
-  const emptyEntryItem = () => ({ productId: '', quantity: 1, costPrice: '' });
+  const emptyEntryItem = () => ({ productId: '', quantity: 1, costPrice: '', minPrice: '' });
   const [entryForm, setEntryForm] = useState({
     vendorId: '',
     warehouseId: '',
@@ -153,11 +153,18 @@ const Inventory = () => {
 
     const items = entryForm.items
       .filter((it) => it.productId && (parseInt(it.quantity) || 0) > 0 && it.costPrice !== '')
-      .map((it) => ({
-        productId: it.productId,
-        quantity: parseInt(it.quantity) || 0,
-        costPrice: parseFloat(it.costPrice) || 0
-      }));
+      .map((it) => {
+        const line = {
+          productId: it.productId,
+          quantity: parseInt(it.quantity) || 0,
+          costPrice: parseFloat(it.costPrice) || 0
+        };
+        // Boş buraxılsa məhsulun mövcud min satış qiyməti dəyişmir.
+        if (it.minPrice !== '' && it.minPrice !== null && it.minPrice !== undefined) {
+          line.minPrice = parseFloat(it.minPrice) || 0;
+        }
+        return line;
+      });
 
     if (items.length === 0) {
       toast.error('Ən azı bir məhsul (miqdar və maya ilə) əlavə edin');
@@ -190,6 +197,9 @@ const Inventory = () => {
       setSelectedOwnerId('');
       resetEntryForm();
       fetchInventory();
+      // Min satış qiyməti məhsulun üzərində dəyişdi — prefill mənbəyini yenilə,
+      // yoxsa növbəti faktura köhnə dəyəri geri yazar.
+      fetchReference();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Xəta baş verdi');
     }
@@ -868,6 +878,7 @@ const Inventory = () => {
                             <th>Məhsul</th>
                             <th style={{ width: '90px' }}>Miqdar</th>
                             <th style={{ width: '120px' }}>Maya dəyəri</th>
+                            <th style={{ width: '130px' }}>Min satış qiyməti</th>
                             <th style={{ width: '110px' }}>Cəm</th>
                             <th style={{ width: '40px' }}></th>
                           </tr>
@@ -879,7 +890,12 @@ const Inventory = () => {
                                 <ProductSearchSelect
                                   products={vendorSortedProducts}
                                   value={item.productId}
-                                  onChange={(id) => updateEntryItem(index, 'productId', id)}
+                                  onChange={(id) => {
+                                    // Min satış qiymətini seçilən məhsuldan doldur (dəyişdirilə bilər).
+                                    const p = vendorSortedProducts.find((pr) => pr._id === id);
+                                    updateEntryItem(index, 'productId', id);
+                                    updateEntryItem(index, 'minPrice', p?.minPrice ?? '');
+                                  }}
                                 />
                               </td>
                               <td>
@@ -900,6 +916,23 @@ const Inventory = () => {
                                   step="0.01"
                                   min="0"
                                 />
+                              </td>
+                              <td>
+                                <input
+                                  type="number"
+                                  className="form-control"
+                                  value={item.minPrice}
+                                  onChange={(e) => updateEntryItem(index, 'minPrice', e.target.value)}
+                                  step="0.01"
+                                  min="0"
+                                  placeholder="0.00"
+                                />
+                                {item.minPrice !== '' && item.costPrice !== ''
+                                  && parseFloat(item.minPrice) < parseFloat(item.costPrice) && (
+                                  <div style={{ fontSize: '0.7rem', color: 'var(--danger)', marginTop: 2 }}>
+                                    Maya dəyərindən aşağıdır
+                                  </div>
+                                )}
                               </td>
                               <td style={{ fontWeight: 600 }}>
                                 {formatCurrency((parseInt(item.quantity) || 0) * (parseFloat(item.costPrice) || 0))}

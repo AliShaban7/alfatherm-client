@@ -9,7 +9,7 @@ pnpm install        # or npm install
 pnpm dev            # Vite dev server (http://localhost:3000)
 ```
 In dev, requests to `/api` are proxied to the backend (see `vite.config.js`,
-target `http://localhost:5001`). Start `alfaterm-server` alongside it.
+target `http://localhost:3030`). Start `alfatherm-server` alongside it.
 
 ## Environment
 - `VITE_API_URL` — backend API base URL. Empty → same-origin `/api` (dev proxy).

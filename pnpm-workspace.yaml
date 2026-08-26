@@ -1,4 +1,9 @@
-# pnpm 10+ blocks dependency build scripts by default; allow esbuild's so
-# `vite build` works in CI (Vercel) without an interactive approval.
+# pnpm blocks dependency build scripts by default; esbuild needs its postinstall
+# for `vite build` to run. Both keys are here on purpose: pnpm 10 (Vercel) reads
+# `onlyBuiltDependencies`, pnpm 11 reads `allowBuilds`. Without them the install
+# fails/warns with ERR_PNPM_IGNORED_BUILDS and vite cannot start esbuild.
+allowBuilds:
+  esbuild: true
+
 onlyBuiltDependencies:
   - esbuild

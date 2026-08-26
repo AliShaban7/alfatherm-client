@@ -73,7 +73,7 @@ const Vendors = () => {
       country: vendor.country || '',
       address: vendor.address || '',
       contactPerson: vendor.contactPerson || '',
-      phone: vendor.phone,
+      phone: vendor.phone || '',
       email: vendor.email || '',
       paymentTerms: vendor.paymentTerms || '',
       note: vendor.note || ''
@@ -170,7 +170,7 @@ const Vendors = () => {
                     <td><strong>{vendor.name}</strong></td>
                     <td>{vendor.companyName || '-'}</td>
                     <td>{vendor.country || '-'}</td>
-                    <td>{vendor.phone}</td>
+                    <td>{vendor.phone || '-'}</td>
                     <td>{formatCurrency(vendor.totalPurchases || 0)}</td>
                     <td style={{ color: vendor.totalDebt > 0 ? 'var(--danger)' : 'inherit' }}>
                       {formatCurrency(vendor.totalDebt || 0)}
@@ -227,13 +227,12 @@ const Vendors = () => {
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label className="form-label">Telefon *</label>
+                    <label className="form-label">Telefon</label>
                     <input
                       type="text"
                       className="form-control"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                      required
                     />
                   </div>
                   <div className="form-group">

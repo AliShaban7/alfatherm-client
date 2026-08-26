@@ -140,6 +140,9 @@ const Products = () => {
       }, {});
 
       if (editingProduct) {
+        // İstehsalçı is part of the uniqueness key and must be clearable: send it
+        // explicitly (null) instead of letting the empty-string strip drop it.
+        cleanedData.vendorId = formData.vendorId || null;
         await productAPI.update(editingProduct._id, cleanedData);
         toast.success('Məhsul yeniləndi');
       } else {
@@ -532,6 +535,7 @@ const Products = () => {
                   <th>SKU</th>
                   <th>Kateqoriya</th>
                   <th>Brend</th>
+                  <th>İstehsalçı</th>
                   <th>Min Qiymət</th>
                   <th>Tövsiyə Qiymət</th>
                   {isOwner() && <th></th>}
@@ -548,6 +552,12 @@ const Products = () => {
                       </span>
                     </td>
                     <td>{product.brand || '-'}</td>
+                    {/* Same name may now repeat under a different İstehsalçı, so
+                        show it. Falls back to the legacy free-text manufacturer. */}
+                    <td>{vendors.find((v) => v._id === product.vendorId)?.companyName
+                      || vendors.find((v) => v._id === product.vendorId)?.name
+                      || product.manufacturer
+                      || '-'}</td>
                     <td>{formatCurrency(product.minPrice)}</td>
                     <td><strong>{formatCurrency(product.recommendedPrice)}</strong></td>
                     {isOwner() && (
@@ -662,15 +672,7 @@ const Products = () => {
                   </div>
                 </div>
                 <div className="form-row">
-                  <div className="form-group">
-                    <label className="form-label">Ölkə</label>
-                    <ComboBox
-                      value={formData.country}
-                      onChange={(v) => setFormData({ ...formData, country: v })}
-                      options={options.country}
-                      placeholder="Siyahıdan seçin və ya əlavə edin"
-                    />
-                  </div>
+                  {/* Ölkə məhsul formasından çıxarıldı — vendor yaradılanda seçilir. */}
                   <div className="form-group">
                     <label className="form-label">Rəng</label>
                     <ComboBox
